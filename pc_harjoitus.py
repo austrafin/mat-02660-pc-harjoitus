@@ -35,9 +35,12 @@ def rredMod2(A):
                 if pivot == 1:
                     replaceRowValues(B, cols, row, pivotIndex)
                 else:
-                    # pivot is 0
-                    replaceRowValues(B, cols, pivotIndex, row)
-                    replaceRowValues(B, cols, row, pivotIndex)
+                    # If pivot is 0, swap the values of
+                    # the pivot row and the current row
+                    for col in range(cols):
+                        temp = A[pivotIndex][col]
+                        A[pivotIndex][col] = A[row][col]
+                        A[row][col] = temp
     
     # Traverse the matrix again but this make
     # all of the values above the pivot 0.
