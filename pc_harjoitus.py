@@ -37,6 +37,7 @@ def rredMod2(A):
                 else:
                     # pivot is 0
                     replaceRowValues(B, cols, pivotIndex, row)
+                    replaceRowValues(B, cols, row, pivotIndex)
     
     # Traverse the matrix again but this make
     # all of the values above the pivot 0.
