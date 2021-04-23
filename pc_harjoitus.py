@@ -1,9 +1,10 @@
 from copy import deepcopy
+from itertools import product
 
 omega = {
-    0: [1, 2, -3, 4],
-    1: [1, 3, 4],
-    2: [3, -3]
+    0: (1, 2, -3, 4),
+    1: (1, 3, 4),
+    2: (3, -3)
 }
 alpha = {
     0: True,
@@ -106,4 +107,48 @@ def rredMod2(A):
                 replaceRowValues(B, cols, row, pivotIndex)
     return B
     
-print(rredMod2(xro2Matrix(omega, alpha)))
+def xSols(B):
+    if B == None or B == []:
+        return [], False
+
+    pivotCols = list()
+    freeVariables = dict()
+
+    for row_idx, row in enumerate(B):
+        freeVariables[row_idx] = set()
+
+        for col_idx, col in enumerate(row):
+            if col == 1:
+                if col_idx == len(row) - 1:
+                    return [], False # contradiction
+                pivotCols.append(col_idx)
+
+                # Collect the free variables
+                for j in range(col_idx + 1, len(row) - 1):
+                    if row[j] == 1:
+                        freeVariables[row_idx].add(j)
+                break
+
+    nonPivotCols = [item for item in range(len(B[0]) - 1) if item not in pivotCols]
+    tCombinations = list(map(list, product([0, 1], repeat = len(nonPivotCols))))
+    X = [[] for _ in range((len(B[0]) - 1))]
+
+    for tParams in tCombinations:
+        xRow = []
+
+        for row_idx, row in enumerate(B):
+            result = row[-1]
+
+            for i, t in enumerate(tParams):
+                if t == 1 and nonPivotCols[i] in freeVariables[row_idx]:
+                    result = (result - 1) % 2
+            xRow.append(result)
+        xRow += tParams
+        print(xRow)
+
+        for i, value in enumerate(xRow):
+            X[i].append(value)
+
+    return X, True
+
+print(xSols(rredMod2(xro2Matrix(omega, alpha))))
