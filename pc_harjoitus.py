@@ -1,7 +1,62 @@
 from copy import deepcopy
 
-A = [[1, 1, 0, 1, 1, 1], [1, 0, 1, 0, 1, 0], [0, 0, 1, 1, 0, 1]]
+omega = {
+    0: [1, 2, -3, 4],
+    1: [1, 3, 4],
+    2: [3, -3]
+}
+alpha = {
+    0: True,
+    1: False,
+    2: True
+}
 
+def xro2Matrix(omega, alpha):
+    '''
+    This function takes omega sets and the alpha
+    values and produces an augmented binary matrix
+    '''
+    
+    A = []
+    all_variables = []
+    
+    # Collect and order all of the variables in omega
+    # The negations should appear after the corresponding
+    # literal, i.e. 1, 2, 3, -3, 4, 5, -5 6, 7
+    for key, variables in omega.items():
+        for var in variables:
+            # The variable should only appear once in the list
+            if var not in all_variables:
+                if not all_variables:
+                    all_variables.append(var)
+                elif abs(var) > abs(all_variables[-1]):
+                    all_variables.append(var)
+                else:
+                    for i, value in enumerate(all_variables):
+                        if abs(var) < abs(value):
+                            all_variables.insert(i, var)
+                            break
+                        elif abs(var) == abs(value): # if negation of a literal
+                            all_variables.insert(i if var > value else i + 1, var)
+                            break
+    columns = dict()
+    
+    for col, var in enumerate(all_variables):
+        columns[var] = col
+        
+    column_count = len(all_variables) + 1
+    
+    for key, variables in omega.items():
+        row = [0] * column_count
+               
+        for var in variables:
+            row[columns[var]] = 1
+        
+        row[column_count - 1] = 1 if alpha[key] else 0
+        A.append(row)
+        
+    return A
+        
 def replaceRowValues(A, cols, targetRow, otherRow):
     '''
     This function replaces the target row values by the
@@ -51,4 +106,4 @@ def rredMod2(A):
                 replaceRowValues(B, cols, row, pivotIndex)
     return B
     
-print(rredMod2(A))
+print(rredMod2(xro2Matrix(omega, alpha)))
