@@ -17,32 +17,31 @@ def xro2Matrix(omega, alpha):
     This function takes omega sets and the alpha
     values and produces an augmented binary matrix
     '''
-
-    allVarsUnsorted = set()
     
     # Collect and order all of the variables in omega
     # The negations should appear after the corresponding
     # literal, i.e. 1, 2, 3, -3, 4, 5, -5, 6, 7
+    allVariables = set()
+
     for key, variables in omega.items():
         for var in variables:
-            allVarsUnsorted.add(var)
-    allVarsSorted = sorted(allVarsUnsorted, key=abs)
+            allVariables.add(var)
 
-    columns = dict()
+    columns = {
+        var: col for col, var in enumerate(sorted(allVariables, key=abs))
+    }
 
-    for col, var in enumerate(allVarsSorted):
-        columns[var] = col
+    columnCount = len(columns) + 1 # Add one for the alpha column
+    A = [] # Augmented binary matrix
+    alphaColumn = columnCount - 1
 
-    columnCount = len(allVarsSorted) + 1
-    A = []
-
-    for key, variables in omega.items():
+    for rowIdx, variables in omega.items():
         row = [0] * columnCount
                
         for var in variables:
             row[columns[var]] = 1
         
-        row[columnCount - 1] = 1 if alpha[key] else 0
+        row[alphaColumn] = 1 if alpha[rowIdx] else 0
         A.append(row)
         
     return A
@@ -103,19 +102,19 @@ def xSols(B):
     pivotCols = list()
     freeVariables = dict()
 
-    for row_idx, row in enumerate(B):
-        freeVariables[row_idx] = set()
+    for rowIdx, row in enumerate(B):
+        freeVariables[rowIdx] = set()
 
-        for col_idx, col in enumerate(row):
+        for colIdx, col in enumerate(row):
             if col == 1:
-                if col_idx == len(row) - 1:
+                if colIdx == len(row) - 1:
                     return [], False # contradiction
-                pivotCols.append(col_idx)
+                pivotCols.append(colIdx)
 
                 # Collect the free variables
-                for j in range(col_idx + 1, len(row) - 1):
+                for j in range(colIdx + 1, len(row) - 1):
                     if row[j] == 1:
-                        freeVariables[row_idx].add(j)
+                        freeVariables[rowIdx].add(j)
                 break
 
     nonPivotCols = [item for item in range(len(B[0]) - 1) if item not in pivotCols]
@@ -125,11 +124,11 @@ def xSols(B):
     for tParams in tCombinations:
         xRow = []
 
-        for row_idx, row in enumerate(B):
+        for rowIdx, row in enumerate(B):
             result = row[-1]
 
             for i, t in enumerate(tParams):
-                if t == 1 and nonPivotCols[i] in freeVariables[row_idx]:
+                if t == 1 and nonPivotCols[i] in freeVariables[rowIdx]:
                     result = (result - 1) % 2
             xRow.append(result)
         xRow += tParams
