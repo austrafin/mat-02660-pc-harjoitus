@@ -17,18 +17,20 @@ def xro2Matrix(omega, alpha):
     This function takes omega sets and the alpha
     values and produces an augmented binary matrix
     '''
-    
-    # Collect and order all of the variables in omega
-    # The negations should appear after the corresponding
-    # literal, i.e. 1, 2, 3, -3, 4, 5, -5, 6, 7
-    allVariables = set()
 
-    for key, variables in omega.items():
-        for var in variables:
-            allVariables.add(var)
+    # Collect all of the variables in omega
+    allVariables = {
+        var for key, variables in omega.items() for var in variables
+    }
 
+    # Sort the variables in the correct column order. The negations should
+    # appear after the corresponding literal, i.e. 1, 2, 3, -3, 4, 5, -5, 6, 7
+    allVariablesSorted = sorted(allVariables, key=abs)
+
+    # Store the column indexes in a dictionary for faster access (constant
+    # time). Using the list function index() would be O(n).
     columns = {
-        var: col for col, var in enumerate(sorted(allVariables, key=abs))
+        var: col for col, var in enumerate(allVariablesSorted)
     }
 
     columnCount = len(columns) + 1 # Add one for the alpha column
@@ -117,8 +119,8 @@ def xSols(B):
     if B == None or B == []:
         return [], False
 
-    pivotCols = list()
-    freeVariables = dict()
+    pivotCols = []
+    freeVariables = {}
 
     for rowIdx, row in enumerate(B):
         freeVariables[rowIdx] = set()
@@ -135,8 +137,9 @@ def xSols(B):
                         freeVariables[rowIdx].add(j)
                 break
 
-    nonPivotCols = [item for item in range(len(B[0]) - 1)
-                    if item not in pivotCols]
+    nonPivotCols = [
+        item for item in range(len(B[0]) - 1) if item not in pivotCols
+    ]
     tCombinations = list(map(list, product([0, 1], repeat = len(nonPivotCols))))
     X = [[] for _ in range((len(B[0]) - 1))]
 
