@@ -27,8 +27,8 @@ def xro2Matrix(omega, alpha):
     # appear after the corresponding literal, i.e. 1, 2, 3, -3, 4, 5, -5, 6, 7
     allVariablesSorted = sorted(allVariables, key=abs)
 
-    # Store the column indexes in a dictionary for faster access (constant
-    # time). Using the list function index() would be O(n).
+    # Store the column indexes in a dictionary for faster access
+    # (constant time). Using the list function index() would be O(n).
     columns = {
         var: col for col, var in enumerate(allVariablesSorted)
     }
@@ -120,44 +120,58 @@ def xSols(B):
         return [], False
 
     pivotCols = []
-    freeVariables = {}
+    freeVariables = {} # Variables corresponding to the non-pivot columns
 
     for rowIdx, row in enumerate(B):
         freeVariables[rowIdx] = set()
 
-        for colIdx, col in enumerate(row):
-            if col == 1:
+        # Scan each row for the pivot columns and free variables
+        for colIdx, variable in enumerate(row):
+            if variable == 1:
+                # Pivot found
+
                 if colIdx == len(row) - 1:
-                    return [], False # contradiction
+                    return [], False # 0 = 1 -> contradiction
+
                 pivotCols.append(colIdx)
 
-                # Collect the free variables
-                for j in range(colIdx + 1, len(row) - 1):
-                    if row[j] == 1:
-                        freeVariables[rowIdx].add(j)
+                # Move to the next column and collect the free variables
+                for col in range(colIdx + 1, len(row) - 1):
+                    if row[col] == 1:
+                        # Row has the variable
+                        freeVariables[rowIdx].add(col)
                 break
 
+    variableCount = len(B[0]) - 1
     nonPivotCols = [
-        item for item in range(len(B[0]) - 1) if item not in pivotCols
+        col for col in range(variableCount) if col not in pivotCols
     ]
+
+    # Every possible combination of t binary parameters
     tCombinations = list(map(list, product([0, 1], repeat = len(nonPivotCols))))
-    X = [[] for _ in range((len(B[0]) - 1))]
+
+    # Output matrix
+    X = [[] for _ in range(variableCount)]
 
     for tParams in tCombinations:
-        xRow = []
+        variableValues = []
 
         for rowIdx, row in enumerate(B):
             result = row[-1]
 
             for i, t in enumerate(tParams):
                 if t == 1 and nonPivotCols[i] in freeVariables[rowIdx]:
+                    # x + t2 + t3 + ... + tn = α - mod(t1, 2)
                     result = (result - 1) % 2
-            xRow.append(result)
-        xRow += tParams
-        print(xRow)
 
-        for i, value in enumerate(xRow):
-            X[i].append(value)
+            variableValues.append(result)
+
+        variableValues += tParams
+
+        # The result matrix is presented so that the variables
+        # are the rows and their results the columns
+        for row, value in enumerate(variableValues):
+            X[row].append(value)
 
     return X, True
 
