@@ -56,10 +56,10 @@ def replaceRowValues(A, cols, targetRow, otherRow):
         
 def rredMod2(A):
     '''
-    Transforms a matrix to row reduced echelon form by performing
-    Gaussian elimination. This function only considers matrixes
-    with binary values.
+    Transforms a matrix to row reduced echelon form by performing Gaussian
+    elimination. This function only considers matrixes with binary values.
     '''
+
     if A == None or A == []:
         return
 
@@ -67,9 +67,8 @@ def rredMod2(A):
     rows = len(B)
     cols = len(B[0])
     
-    # Traverse the matrix diagonally. In other words
-    # the row index and the columns index for the
-    # pivot is always the same.
+    # Traverse the matrix diagonally. In other words the row index and the
+    # columns index for the pivot is always the same.
     for pivotIndex in range(rows):
         pivot = B[pivotIndex][pivotIndex]
         
@@ -96,6 +95,25 @@ def rredMod2(A):
     return B
     
 def xSols(B):
+    '''
+    This function takes in a row-reduced augmented matrix and checks whether it
+    has a solution and if so, returns True and a matrix with all the possible
+    solutions. If there is no solution, False and an empty matrix is returned.
+
+    The rows of the matrix represent a variable (literal) and the columns
+    different solutions (1 or 0). For example, consider the following matrix:
+
+    [[1, 0, 0, 1], [0, 0, 0, 0], [1, 1, 0, 0], [0, 0, 1, 1], [0, 1, 0, 1]]
+
+    This means that the first solution is:
+    x1 = 1, x2 = 0, x3 = 1, x4 = 0, x5 = 0
+
+    and the second solutions is:
+    x1 = 0, x2 = 0, x3 = 1, x4 = 0, x5 = 1
+
+    and so on.
+    '''
+
     if B == None or B == []:
         return [], False
 
@@ -117,7 +135,8 @@ def xSols(B):
                         freeVariables[rowIdx].add(j)
                 break
 
-    nonPivotCols = [item for item in range(len(B[0]) - 1) if item not in pivotCols]
+    nonPivotCols = [item for item in range(len(B[0]) - 1)
+                    if item not in pivotCols]
     tCombinations = list(map(list, product([0, 1], repeat = len(nonPivotCols))))
     X = [[] for _ in range((len(B[0]) - 1))]
 
