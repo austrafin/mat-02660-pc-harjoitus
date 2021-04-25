@@ -154,7 +154,7 @@ def xSols(B):
     X = [[] for _ in range(variableCount)]
 
     for tParams in tCombinations:
-        variableValues = []
+        variableValues = [] # x̂ + t1v1 + t2v2 + ... + tnvn
 
         for rowIdx, row in enumerate(B):
             result = row[-1]
