@@ -2,17 +2,6 @@ from copy import deepcopy
 from itertools import product
 import math
 
-omega = {
-    0: (1, 2, -3, 4),
-    1: (1, 3, 4),
-    2: (3, -3)
-}
-alpha = {
-    0: True,
-    1: False,
-    2: True
-}
-
 def xro2Matrix(omega, alpha):
     '''
     This function takes omega sets and the alpha
@@ -116,10 +105,19 @@ def xSols(B):
     if not B:
         return [], False
 
+    # Discard zero-rows
+    C = []
+
+    for row in B:
+        for col in row:
+            if col == 1:
+                C.append(row)
+                break
+
     pivotCols = []
     freeVariables = {} # Variables corresponding to the non-pivot columns
 
-    for rowIdx, row in enumerate(B):
+    for rowIdx, row in enumerate(C):
         freeVariables[rowIdx] = set()
 
         # Scan each row for the pivot columns and free variables
@@ -139,7 +137,7 @@ def xSols(B):
                         freeVariables[rowIdx].add(col)
                 break
 
-    variableCount = len(B[0]) - 1
+    variableCount = len(C[0]) - 1
     nonPivotCols = [
         col for col in range(variableCount) if col not in pivotCols
     ]
@@ -153,7 +151,7 @@ def xSols(B):
     for tParams in tCombinations:
         variableValues = [] # x̂ + t1v1 + t2v2 + ... + tnvn
 
-        for rowIdx, row in enumerate(B):
+        for rowIdx, row in enumerate(C):
             result = row[-1]
 
             for i, t in enumerate(tParams):
@@ -189,6 +187,7 @@ def printSolutions(solutionsMatrix, columns):
     '''
 
     if not solutionsMatrix:
+        print("No solutions")
         return
 
     variables = []
@@ -220,7 +219,3 @@ def printSolutions(solutionsMatrix, columns):
         for j in range(variablesCount):
             print(solutionsMatrix[j][i], end=spacing)
         print('\n')
-
-augmentedBinaryMatrix, columns = xro2Matrix(omega, alpha)
-solution = xSols(rredMod2(augmentedBinaryMatrix))
-printSolutions(solution[0], columns)
