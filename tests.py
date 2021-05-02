@@ -1,4 +1,5 @@
-from pc_harjoitus import xro2Matrix, rredMod2, xSols, printSolutions
+from pc_harjoitus import xro2Matrix, rredMod2, xSols
+from print_functions import printSolutions
 
 # (a)
 omega = {
